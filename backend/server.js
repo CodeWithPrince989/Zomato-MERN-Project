@@ -1,11 +1,14 @@
-//start server
-const app =require('./src/app');
-//connecting server to db
-const connectDB = require('.src/db/db');
+require('dotenv').config();
 
-connectDB();
+const app = require('./src/app');
+const connectDB = require('./src/db/db');
 
-//main work to connect server to database(i use mongodb)
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
-})
+connectDB().catch((error) => {
+    console.error('MongoDB connection error:', error.message);
+});
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});

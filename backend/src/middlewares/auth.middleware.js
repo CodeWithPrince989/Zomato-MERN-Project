@@ -1,29 +1,67 @@
-const foodPartnerAuth = require('../models/foodpartner.model');
-const jwt = require('jsonwebtoken');
+const foodPartnerModel = require("../models/foodpartner.model")
+const userModel = require("../models/user.model")
+const jwt = require("jsonwebtoken");
 
-async function authFoodPartner(req, res, next) {
+
+async function authFoodPartnerMiddleware(req, res, next) {
+
     const token = req.cookies.token;
 
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+        return res.status(401).json({
+            message: "Please login first"
+        })
     }
 
-    let decoded;
     try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-        return res.status(401).json({ message: 'Invalid token.' });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        const foodPartner = await foodPartnerModel.findById(decoded.id);
+
+        req.foodPartner = foodPartner
+
+        next()
+
+    } catch (err) {
+
+        return res.status(401).json({
+            message: "Invalid token"
+        })
+
     }
 
-    const foodPartner = await foodPartnerAuth.findById(decoded.id);
-    if (!foodPartner) {
-        return res.status(401).json({ message: 'Food partner account not found.' });
+}
+
+async function authUserMiddleware(req, res, next) {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({
+            message: "Please login first"
+        })
     }
 
-    req.foodPartner = foodPartner;
-    next();
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        const user = await userModel.findById(decoded.id);
+
+        req.user = user
+
+        next()
+
+    } catch (err) {
+
+        return res.status(401).json({
+            message: "Invalid token"
+        })
+
+    }
+
 }
 
 module.exports = {
-    authFoodPartnerMiddleware: authFoodPartner
-};
+    authFoodPartnerMiddleware,
+    authUserMiddleware
+}

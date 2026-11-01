@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
 
+
+
 function connectDB() {
-    const mongoUri = process.env.MONGODB_URI;
-
-    if (!mongoUri) {
-        return Promise.reject(new Error('MONGODB_URI is not set in the backend .env file.'));
-    }
-
-    return mongoose.connect(mongoUri).then((connection) => {
-        console.log('MongoDB connected');
-        return connection;
-    });
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => {
+            console.log("MongoDB connected");
+        })
+        .catch((err) => {
+            console.log("MongoDB connection error:", err);
+        })
 }
 
 module.exports = connectDB;
